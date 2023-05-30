@@ -1,9 +1,21 @@
-module.exports = {
-    production: {
-        username: 'root',
-        password: '',
-        database: 'spring',
-        host: 'localhost:3306',
+const Sequelize = require('sequelize');
+
+const sequelize = new Sequelize(
+    'spring', 
+    'root', 
+    '', 
+    {
+        host: 'localhost',
         dialect: 'mysql',
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectedUnauthorized: false
+            }
+        }
     }
-}
+);
+
+module.exports = sequelize;
+
+module.exports = sequelize

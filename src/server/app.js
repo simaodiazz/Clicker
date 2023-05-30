@@ -1,20 +1,40 @@
-const Express = require('express');
-const Sequelize = require('sequelize');
+const Express = require('express')
 
-const databaseConfiguration = require('./config/database');
+const app = Express(); 
 
-const express = Express();
+const server = require('./config/server')
+const sequelize = require("./config/database")
 
-// Este função faz com que o middleware interprete as solicitações recebidas e enviadas como um arquivo JSON
-express.use(Express.json());
+const userRoute = require('./routes/userRoute')
 
-const mysql = databaseConfiguration.production;
+const auth = require('./middleware/auth')
 
-const sequelize = new Sequelize(mysql.database, mysql.username, mysql.password, {
-    host: mysql.host,
-    dialect: mysql.dialect,
-});
+// Middleware para interpretação de arquivos JSON
+app.use(Express.json)
 
-express.listen(3000, () => {
-    console.log('Servidor iniciado na porta 3000');
-});
+app.use(
+    session({
+        secret: "NAWIGPNijsngPIAWgnPUIAJSngIPAWgiupANSJGANiup",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 604800000
+        }
+    })
+)
+
+app.use('/api/user', auth.checkAuth, userRoute)
+
+sequelize
+    .sync()
+    .then(() => {
+        app.listen(server.port, () => {
+            console.log(`Running Express Server on Port ${server.port}`)
+        });
+    })
+    .catch((error) => {
+        console.log('Erro ao sincrozinar o banco de dados', error)
+    }
+);
+
+module.exports = sequelize
